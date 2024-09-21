@@ -1,16 +1,22 @@
 {
   "name": "loginsvc",
   "version": "1.0.0",
-  "description": "Uber clone with email-based signup and login",
+  "description": "Uber clone with email-based signup, login, and CAPTCHA verification",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.12"
-  }
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "author": "Dabeer Shaikh",
+  "license": "ISC"
 }

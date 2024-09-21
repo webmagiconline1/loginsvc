@@ -1,14 +1,24 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const axios = require('axios'); // Add axios for reCAPTCHA validation
 const User = require('../models/User');
 const router = express.Router();
 
-// Signup Route
+// Signup Route with reCAPTCHA
 router.post('/signup', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, recaptchaToken } = req.body;
 
     try {
+        // Verify reCAPTCHA
+        const secretKey = process.env.RECAPTCHA_SECRET;
+        const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
+        
+        const captchaResponse = await axios.post(verificationURL);
+        if (!captchaResponse.data.success) {
+            return res.status(400).json({ message: 'CAPTCHA verification failed' });
+        }
+
         // Check if the user already exists
         const userExists = await User.findOne({ email });
         if (userExists) {
@@ -27,31 +37,3 @@ router.post('/signup', async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 });
-
-// Login Route
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        // Find the user by email
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid email or password' });
-        }
-
-        // Check if password matches
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid email or password' });
-        }
-
-        // Generate JWT
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        return res.status(200).json({ message: 'Login successful', token });
-    } catch (error) {
-        return res.status(500).json({ message: 'Server error' });
-    }
-});
-
-module.exports = router;
