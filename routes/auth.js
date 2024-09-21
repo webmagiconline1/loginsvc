@@ -67,7 +67,7 @@ router.post('/signup', [
     }
 
     try {
-        // Verify reCAPTCHA
+        // Verify reCAPTCHA (scrum-11)
         const secretKey = process.env.RECAPTCHA_SECRET;
         const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
         
