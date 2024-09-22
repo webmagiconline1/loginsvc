@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: login-service
+  labels:
+    app: uber-clone
+spec:
+  replicas: 3  # Number of replicas (containers) to run
+  selector:
+    matchLabels:
+      app: uber-clone
+  template:
+    metadata:
+      labels:
+        app: uber-clone
+    spec:
+      containers:
+      - name: login-service-container
+        image: your-docker-image:latest  # Replace with your Docker image
+        ports:
+        - containerPort: 5000
+        env:
+        - name: MONGO_URI
+          value: "mongodb://mongo:27017/uber-clone"  # MongoDB URI
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: uber-clone-secret
+              key: jwt_secret
+        - name: RECAPTCHA_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: uber-clone-secret
+              key: recaptcha_secret
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 20
